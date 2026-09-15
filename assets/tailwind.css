@@ -1,0 +1,104 @@
+@import "tailwindcss" source(none);
+@source "../index.html";
+@source "../apotek.html";
+@source "./site.js";
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --font-sans: "Inter", sans-serif;
+
+  --animate-rise: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pop: pop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-float-slow: float 9s ease-in-out infinite;
+  --animate-bounce-soft: bounce-soft 5s ease-in-out infinite;
+  --animate-drift: drift 7s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 4.5s ease-in-out infinite;
+  --animate-blink: blink 5.5s steps(1, end) infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-gradient-pan: gradient-pan 14s ease-in-out infinite alternate;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(26px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+  @keyframes bounce-soft {
+    0%,
+    100% {
+      transform: translateY(4px) scaleX(1);
+    }
+    50% {
+      transform: translateY(-8px) scaleX(1.02);
+    }
+  }
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translateX(0) rotate(0deg);
+    }
+    50% {
+      transform: translateX(10px) rotate(6deg);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.07);
+    }
+  }
+  @keyframes blink {
+    0%,
+    90%,
+    100% {
+      transform: scaleY(1);
+    }
+    93%,
+    96% {
+      transform: scaleY(0.12);
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes gradient-pan {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 100% 50%;
+    }
+  }
+}

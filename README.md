@@ -28,6 +28,8 @@ npm run build
 npm run watch
 ```
 
+`npm run build` menjalankan dua hal: mengompilasi Tailwind ke `assets/site.css`, lalu menyalin berkas statis ke `public/` lewat `scripts/build-public.js`. Salinan `public/` itu yang dipakai sebagai direktori output deploy dan tidak ikut di-commit (masuk `.gitignore`); sumber tetap di root repo supaya server lokal dan `tests/` bekerja seperti biasa. Hanya `npm run watch` yang tidak menyentuh `public/`, jadi setelah mengubah HTML jalankan `npm run build` sebelum melihat hasil di `public/`.
+
 - Utility Tailwind langsung di HTML; token font dan varian dark ada di `assets/tailwind.css`.
 - Level desain: **frontend level creative** (aturan level normal tetap berlaku sebagai dasar). Satu skema warna aksen: **blue**; netral `slate`. Hal yang wajib dipertahankan saat menyunting:
   - Hero memakai display font Fredoka (`font-display`, bukan Inter) dengan gradient text dan stagger `animate-rise`; teks hero lainnya (paragraf, tombol) tetap Inter.
@@ -42,6 +44,10 @@ npm run watch
 - Aset merek di `images/`. Logo metode pembayaran ada di `images/payments/` (QRIS, GoPay, BCA dari Wikimedia Commons, public domain; DANA dan ShopeePay dari ikon aplikasi resmi di App Store). Kelimanya tampil sebagai baris chip di section "Pembayaran" pada footer kedua halaman, di atas baris hak cipta.
 - Tema awal terang. Pilihan pengguna disimpan sebagai `nori-theme`; tetap berfungsi bila storage browser diblokir.
 - Seluruh konten dan navigasi antar-bagian tetap tersedia tanpa JavaScript. Menu bagian header (Tampilan, Fitur, Spesifikasi, Info penting) hanya tampil pada layar sedang ke atas.
+
+## Deploy
+
+Vercel dikonfigurasi lewat `vercel.json`: perintah build `npm run build` dengan direktori output `public`. Tanpa itu Vercel mencari `public/` yang belum ada dan berhenti dengan `No Output Directory named "public" found after the Build completed`. Karena `assets/site.css` sudah ikut di-commit, deploy tetap bisa dilayani sebagai situs statis murni tanpa langkah build; kalau build dimatikan, arahkan direktori output ke root proyek sebagai gantinya.
 
 ## Verifikasi
 

@@ -131,8 +131,8 @@ try:
 
         page.goto(f'{BASE}/apotek.html')
         categories = page.locator('#fitur section')
-        assert categories.count() == 5
-        for index in range(5):
+        assert categories.count() == 8
+        for index in range(8):
             assert categories.nth(index).is_visible()
             assert categories.nth(index).locator('ul li').count() >= 2
         assert page.locator('#spesifikasi dl div').count() == 6
@@ -173,7 +173,7 @@ try:
         assert modal.get_attribute('open') is None
         record('Product details render as feature groups, specs, an expandable FAQ and a shot modal')
 
-        # Creative-level motion and artwork: counters finish, reveals clear, art draws geometry.
+        # Creative-level motion and artwork: counters finish, art draws geometry; tanpa fade-in masuk.
         # Harga statis dan tanpa kartu KPI, jadi tidak ada counter di kedua halaman.
         for page_name, expected_counters, expected_marquee in (('index.html', 0, 0), ('apotek.html', 0, 1)):
             page.goto(f'{BASE}/{page_name}')
@@ -188,11 +188,13 @@ try:
                 .map(use => use.getAttribute('href') || '')
                 .filter(href => /#(doodle|mascot|avatar)-/.test(href))""")
             assert not art, (page_name, 'character artwork is back', art)
+            # Tanpa fade-in masuk: tidak ada hook reveal maupun animasi masuk di kedua halaman.
+            assert page.locator('[data-reveal]').count() == 0
+            assert page.locator('[class*="animate-rise"]').count() == 0
             page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
             page.wait_for_function("""() => [...document.querySelectorAll('[data-counter]')]
                 .every(el => Number(el.textContent.replace(/[^0-9]/g, '')) === Number(el.dataset.counter))""")
-            page.wait_for_function("() => document.querySelectorAll('[data-reveal].opacity-0').length === 0")
-            record(f'{page_name}: no character artwork, counters finish, reveals clear')
+            record(f'{page_name}: no character artwork, no entrance fade, counters finish')
 
         page.set_viewport_size({'width': 375, 'height': 812})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -223,7 +225,7 @@ try:
         assert no_js_page.locator('#fitur').is_visible()
         assert no_js_page.locator('#spesifikasi').is_visible()
         assert no_js_page.locator('#informasi').is_visible()
-        assert no_js_page.locator('#fitur section').count() == 5
+        assert no_js_page.locator('#fitur section').count() == 8
         assert 'Rp 450.000' in no_js_page.locator('main').inner_text()
         record('No-JavaScript fallback keeps headline, product list and details')
         no_js.close()

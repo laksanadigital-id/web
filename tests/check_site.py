@@ -44,6 +44,8 @@ class SiteStructure(unittest.TestCase):
                 self.assertIn('motion-reduce:', source)
                 self.assertNotIn('youtube....playlist', source)
                 self.assertNotRegex(source, r'\b(?:rounded-[23]xl|text-[3-9]xl|transition-all)\b')
+                # Hover tetap datar: hanya warna dan bayangan, tanpa naik atau membesar.
+                self.assertNotRegex(source, r'(?<![-\w])hover:(?:-translate-y-[\d.]+|scale-\[[\d.]+\])')
                 for tag, attrs in document.tags:
                     self.assertNotIn(tag, ('style', 'select', 'option'))
                     self.assertNotIn('style', attrs)
@@ -100,7 +102,7 @@ class SiteStructure(unittest.TestCase):
                              'Every catalog card needs an app preview image')
         for detail in ('FEFO', 'FIFO', 'Import/Export', 'Stok opname', 'Cetak struk', 'Point of Sales',
                        'laba rugi', 'arus kas', 'Backup otomatis', 'Fitur dalam aplikasi',
-                       'Kelompok fitur', 'Offline penuh', 'Akses jaringan lokal', 'Dukungan 60 hari'):
+                       'Kelompok fitur', 'Offline penuh', 'Akses jaringan lokal', 'dukungan teknis 30 hari'):
             self.assertNotIn(detail, source, f'Home page leaks per-app detail: {detail}')
         # Product marketing blocks (capability marquee, KPI strip, role cards) belong to the product
         # page; the catalog page stays headline + grid + footer.
@@ -110,8 +112,8 @@ class SiteStructure(unittest.TestCase):
         # Harga tampil sebagai teks statis (tanpa counter-up) dan halaman katalog tetap
         # memakai hook gerak kreatifnya.
         self.assertNotIn('data-counter', source, 'Harga di halaman katalog harus statis')
-        # Creative motion hooks that stay on the catalog page.
-        for hook in ('data-reveal', 'data-parallax', 'data-cursor-glow',
+        # Creative motion hooks that stay on the catalog page (tanpa fade-in masuk).
+        for hook in ('data-parallax', 'data-cursor-glow',
                      'animate-gradient-pan', 'animate-pulse-soft'):
             self.assertIn(hook, source)
         # Legacy landing-page sections stay removed: no comparison table, no purchase-funnel block.
@@ -136,7 +138,7 @@ class SiteStructure(unittest.TestCase):
 
     def test_preserved_product_contract(self):
         source = (ROOT / 'apotek.html').read_text(encoding='utf-8')
-        for expected in ('Rp 450.000', 'Windows 10', '4 GB', '100 GB', '60 hari',
+        for expected in ('Rp 450.000', 'Windows 10', '4 GB', '100 GB', '30 hari',
                          'FEFO', 'FIFO', 'Import/Export Excel',
                          'lynk.id/nor1c/45w2ryrdxn3p', 'wa.me/',
                          'Backup &amp; restore database'):
@@ -144,9 +146,10 @@ class SiteStructure(unittest.TestCase):
         # The product page keeps its three plain sections: features, specs, key notes.
         for anchor in ('id="fitur"', 'id="spesifikasi"', 'id="informasi"'):
             self.assertIn(anchor, source)
-        # Hero, strip marquee, grid tangkapan layar, perincian fitur (5 kelompok), spesifikasi,
-        # kartu peran, dan FAQ (detail/summary) tetap section biasa.
-        self.assertEqual(source.count('<section'), 12)
+        # Hero (dengan blok harga di bawah headline), strip marquee, grid tangkapan layar,
+        # perincian fitur (8 kelompok modul), spesifikasi, kartu peran, dan FAQ
+        # (detail/summary) tetap section biasa.
+        self.assertEqual(source.count('<section'), 15)
 
     def test_no_character_artwork(self):
         # Both pages stay illustration-free: no mascots, role avatars or doodle ornaments.
@@ -182,13 +185,24 @@ class SiteStructure(unittest.TestCase):
         self.assertIn('--font-sans: "Inter"', theme)
         self.assertNotIn('--font-display', theme, 'the theme must not define a second family')
 
+    def test_no_entrance_fade_effects(self):
+        # Fade-in masuk sudah dihapus di semua halaman: tanpa hook reveal, tanpa animasi rise/pop.
+        for filename in self.PAGES:
+            with self.subTest(page=filename):
+                source = (ROOT / filename).read_text(encoding='utf-8')
+                for removed in ('data-reveal', 'animate-rise', 'animate-pop', '[animation-delay:'):
+                    self.assertNotIn(removed, source, f'{filename} still ships {removed}')
+        theme = (ROOT / 'assets/tailwind.css').read_text(encoding='utf-8')
+        for removed in ('--animate-rise', '--animate-pop', '@keyframes rise', '@keyframes pop'):
+            self.assertNotIn(removed, theme, f'build theme still ships {removed}')
+
     def test_shared_script_is_minimal(self):
         script = (ROOT / 'assets/site.js').read_text(encoding='utf-8')
         self.assertIn('nori-theme', script)
-        # Entrance reveals, counters, parallax, the cursor glow and the screenshot modal stay
-        # dependency-free.
-        for hook in ('IntersectionObserver', 'data-counter', 'data-reveal', 'data-shot-modal', 'prefers-reduced-motion'):
+        # Counters, parallax, the cursor glow and the screenshot modal stay dependency-free.
+        for hook in ('IntersectionObserver', 'data-counter', 'data-shot-modal', 'prefers-reduced-motion'):
             self.assertIn(hook, script)
+        self.assertNotIn('data-reveal', script, 'site.js masih memasang reveal fade-in')
         for removed in ('fetch(', 'tabpanel', 'localStorage.setItem("nori-theme", dark'):
             self.assertNotIn(removed, script, f'site.js still ships {removed}')
 

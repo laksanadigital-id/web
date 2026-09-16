@@ -47,38 +47,6 @@
     }, { passive: true });
   }
 
-  // Scroll entrance: the markup stays visible without JavaScript, so the hidden state is applied
-  // only to elements that start below the viewport. A rAF-throttled scroll check then reveals each
-  // element, including elements a jump-scroll passed over. Stagger comes from Tailwind delay
-  // utilities in the markup.
-  const revealItems = [...document.querySelectorAll('[data-reveal]')];
-  const revealHidden = ['opacity-0', 'translate-y-8'];
-  if (revealItems.length && !reduceMotion.matches) {
-    let pending = revealItems.filter(element => element.getBoundingClientRect().top > window.innerHeight * 0.85);
-    if (pending.length) {
-      pending.forEach(element => element.classList.add(...revealHidden));
-      let revealFrame = false;
-      function settleReveal() {
-        revealFrame = false;
-        pending = pending.filter(element => {
-          const rect = element.getBoundingClientRect();
-          const stillBelow = rect.top >= window.innerHeight * 0.9 && rect.bottom > 0;
-          if (stillBelow) return true;
-          element.classList.remove(...revealHidden);
-          return false;
-        });
-        if (!pending.length) window.removeEventListener('scroll', queueReveal);
-      }
-      function queueReveal() {
-        if (revealFrame) return;
-        revealFrame = true;
-        window.requestAnimationFrame(settleReveal);
-      }
-      window.addEventListener('scroll', queueReveal, { passive: true });
-      window.addEventListener('resize', queueReveal, { passive: true });
-    }
-  }
-
   // Figures in the markup are final; JavaScript only replays them from zero for storytelling.
   const counterFormat = new Intl.NumberFormat('id-ID');
   document.querySelectorAll('[data-counter]').forEach(counter => {
